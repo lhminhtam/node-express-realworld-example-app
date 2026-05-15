@@ -21,11 +21,15 @@ jobs:
       - run: npx nx build api --prod
 
   build-and-push-docker:
-    needs: build-and-test # Chỉ chạy nếu bước test/build ở trên thành công
+    needs: build-and-test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      # THÊM BƯỚC NÀY: Thiết lập Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -38,5 +42,6 @@ jobs:
         with:
           context: .
           push: true
-          # Thay 'your-username' bằng tên thật của bạn trên Docker Hub
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/conduit-api:latest
+          # Nếu Dockerfile của bạn nằm ở thư mục khác, hãy chỉ định rõ:
+          # file: ./path/to/Dockerfile
