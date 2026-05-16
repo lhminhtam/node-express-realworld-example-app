@@ -20,14 +20,29 @@ jobs:
       - run: npx prisma generate --schema ./src/prisma/schema.prisma
       - run: npx nx build api --prod
 
+      # Lưu lại thư mục dist
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: dist/
+
   build-and-push-docker:
     needs: build-and-test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses:
+          actions/checkout@v4
 
-      # THÊM BƯỚC NÀY: Thiết lập Docker Buildx
+          # Tải lại thư mục dist đã build từ Job 1
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output
+          path: dist/
+
+      # Thiết lập Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -43,5 +58,3 @@ jobs:
           context: .
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/conduit-api:latest
-          # Nếu Dockerfile của bạn nằm ở thư mục khác, hãy chỉ định rõ:
-          # file: ./path/to/Dockerfile
