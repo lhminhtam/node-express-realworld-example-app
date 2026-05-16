@@ -3,7 +3,6 @@ name: CI/CD Process
 on:
   push:
     branches: [master, main]
-
   pull_request:
     branches: [master, main]
 
@@ -20,33 +19,13 @@ jobs:
       - run: npx prisma generate --schema ./src/prisma/schema.prisma
       - run: npx nx build api --prod
 
-      # Lưu lại thư mục dist
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-output
-          path: dist/
-
   build-and-push-docker:
-    needs: build-and-test
+    needs: build-and-test # Vẫn giữ để đảm bảo code chạy test ok mới build Docker
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses:
-          actions/checkout@v4
+        uses: actions/checkout@v4
 
-          # Tải lại thư mục dist đã build từ Job 1
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-output
-          path: dist/
-
-      # Kiểm tra thư mục dist
-      - name: Debug Link
-        run: ls -R dist/
-
-      # Thiết lập Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 

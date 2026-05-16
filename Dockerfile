@@ -24,7 +24,7 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Copy các file cần thiết từ stage builder
-COPY --from=builder /app/dist/apps/api ./dist/api
+COPY --from=builder /app/dist/api ./dist/api
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/src/prisma ./src/prisma
