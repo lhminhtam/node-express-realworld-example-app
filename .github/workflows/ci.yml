@@ -42,6 +42,10 @@ jobs:
           name: build-output
           path: dist/
 
+      # Kiểm tra thư mục dist
+      - name: Debug Link
+        run: ls -R dist/
+
       # Thiết lập Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
