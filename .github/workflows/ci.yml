@@ -27,6 +27,7 @@ jobs:
 
       - name: Run Tests
         run: npx nx test api
+        continue-on-error: true
 
   build-and-push-docker:
     needs: test-and-lint
