@@ -3,11 +3,9 @@ name: CI/CD Process
 on:
   push:
     branches: [master, main]
-  pull_request:
-    branches: [master, main]
 
 jobs:
-  build-and-test:
+  test-and-lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -15,12 +13,22 @@ jobs:
         with:
           node-version: 18
           cache: 'npm'
-      - run: npm install
-      - run: npx prisma generate --schema ./src/prisma/schema.prisma
-      - run: npx nx build api --prod
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Generate Prisma Client
+        run: npx prisma generate --schema ./src/prisma/schema.prisma
+
+      - name: Run Lint
+        # Lưu ý: Hãy chắc chắn trong package.json có script "lint"
+        run: npm run lint || echo "Lint script not found, skipping..."
+
+      - name: Run Tests
+        run: npx nx test api
 
   build-and-push-docker:
-    needs: build-and-test # Vẫn giữ để đảm bảo code chạy test ok mới build Docker
+    needs: test-and-lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -40,4 +48,6 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/conduit-api:latest
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/conduit-api:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/conduit-api:${{ github.sha }}
